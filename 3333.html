@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AHJ - Ultra 3D Medical System</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-green: #00ff88;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Rajdhani', sans-serif;
+            background: #050a10;
+            color: #e0e6ed;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Fixed Layout Structure */
+        #main-app {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Sidebar - Left Side (Fixed Width) */
+        .side-bar {
+            width: 450px;
+            min-width: 450px;
+            background: rgba(10, 20, 30, 0.8);
+            border-right: 2px solid var(--border);
+            padding: 25px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Data Panel - Right Side (Takes remaining space) */
+        .data-panel {
+            flex-grow: 1;
+            padding: 25px;
+            background: rgba(0,0,0,0.4);
+            overflow-y: auto;
+        }
+
+        .glass-box {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 18px;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 { font-family: 'Orbitron'; color: var(--neon-blue); margin: 0 0 15px 0; text-transform: uppercase; }
+
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        label { display: block; font-size: 11px; color: #8899a6; font-weight: bold; margin-bottom: 4px; }
+        
+        input, select {
+            width: 100%; height: 40px; padding: 0 10px;
+            background: rgba(0,0,0,0.5); border: 1px solid var(--border);
+            border-radius: 6px; color: #fff; font-size: 14px; box-sizing: border-box;
+        }
+
+        /* Buttons Section - Visible & Fixed */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+            padding-bottom: 20px;
+        }
+
+        .action-btn {
+            height: 50px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Orbitron';
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn-save { background: var(--neon-green); color: #000; }
+        .btn-print { background: var(--neon-blue); color: #000; }
+        .btn-clear { background: #444; color: #fff; grid-column: span 2; }
+        
+        .action-btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+
+        /* Table Styling */
+        table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.02); border-radius: 10px; overflow: hidden; }
+        th { background: rgba(0, 242, 255, 0.1); color: var(--neon-blue); text-align: left; padding: 15px; font-size: 13px; }
+        td { padding: 12px 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        tr:hover { background: rgba(255,255,255,0.05); }
+
+    </style>
+</head>
+<body>
+
+<div id="main-app">
+    <!-- LEFT SIDE: FORM -->
+    <div class="side-bar">
+        <h2>🏥 AZIZ HOSPITAL</h2>
+        
+        <div class="glass-box">
+            <div class="input-grid">
+                <div><label>DATE</label><input type="date" id="entryDate"></div>
+                <div><label>MR NUMBER</label><input type="text" id="mrNumber" placeholder="Search/New"></div>
+                <div><label>TOKEN</label><input type="text" id="appNo" readonly style="color:var(--neon-green); font-weight:bold"></div>
+                <div><label>TIME</label><input type="time" id="entryTime"></div>
+            </div>
+        </div>
+
+        <div class="glass-box">
+            <h3>PATIENT INFO</h3>
+            <div class="input-grid">
+                <div style="grid-column: span 2;"><label>FULL NAME</label><input type="text" id="pName"></div>
+                <div><label>AGE</label><input type="number" id="age"></div>
+                <div><label>GENDER</label>
+                    <select id="gender"><option>Male</option><option>Female</option></select>
+                </div>
+                <div style="grid-column: span 2;"><label>CONTACT</label><input type="text" id="contact"></div>
+                <div style="grid-column: span 2;"><label>DOCTOR</label>
+                    <select id="drName" onchange="updateFee()">
+                        <option value="">-- Choose --</option>
+                        <option value="Dr. Abdul Aziz SB">Dr. Abdul Aziz SB</option>
+                        <option value="DR. Shahid Aziz SB">DR. Shahid Aziz SB</option>
+                        <option value="Dr. Ali Naqi SB">Dr. Ali Naqi SB</option>
+                    </select>
+                </div>
+            </div>
+            <div style="margin-top:12px"><label>FEES (PKR)</label><input type="number" id="fee"></div>
+        </div>
+
+        <!-- Buttons are HERE -->
+        <div class="btn-group">
+            <button class="action-btn btn-save" onclick="saveData()">SAVE RECORD</button>
+            <button class="action-btn btn-print" onclick="window.print()">PRINT SLIP</button>
+            <button class="action-btn btn-clear" onclick="resetForm()">NEW ENTRY / CLEAR</button>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE: RECORDS -->
+    <div class="data-panel">
+        <h3>RECORDS HISTORY</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>MR#</th>
+                    <th>Name</th>
+                    <th>Doctor</th>
+                    <th>Fee</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Data will show here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let patients = JSON.parse(localStorage.getItem('hospitalData')) || [];
+
+    function resetForm() {
+        document.getElementById('entryDate').valueAsDate = new Date();
+        document.getElementById('entryTime').value = new Date().toLocaleTimeString('en-GB', {hour12:false, hour:'2-digit', minute:'2-digit'});
+        document.getElementById('appNo').value = "TK-" + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('mrNumber').value = "";
+        document.getElementById('pName').value = "";
+        document.getElementById('age').value = "";
+        document.getElementById('contact').value = "";
+        document.getElementById('fee').value = "";
+        document.getElementById('drName').selectedIndex = 0;
+    }
+
+    function updateFee() {
+        const fees = {"Dr. Abdul Aziz SB": 1500, "DR. Shahid Aziz SB": 1200, "Dr. Ali Naqi SB": 1000};
+        document.getElementById('fee').value = fees[document.getElementById('drName').value] || 0;
+    }
+
+    function saveData() {
+        const name = document.getElementById('pName').value;
+        if(!name) { alert("Please enter Name!"); return; }
+
+        const data = {
+            mr: document.getElementById('mrNumber').value || 'N/A',
+            name: name,
+            dr: document.getElementById('drName').value,
+            fee: document.getElementById('fee').value,
+        };
+
+        patients.push(data);
+        localStorage.setItem('hospitalData', JSON.stringify(patients));
+        loadTable();
+        alert("Record Saved Successfully!");
+    }
+
+    function loadTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        patients.slice().reverse().forEach((p, index) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${p.mr}</td>
+                    <td>${p.name}</td>
+                    <td>${p.dr}</td>
+                    <td>${p.fee}</td>
+                    <td><button onclick="deleteRecord(${patients.length - 1 - index})" style="color:#ff4b2b; background:none; border:none; cursor:pointer; font-weight:bold">DELETE</button></td>
+                </tr>`;
+        });
+    }
+
+    // Initialize
+    resetForm();
+    loadTable();
+</script>
+
+</body>
+</html>
