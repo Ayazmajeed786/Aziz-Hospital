@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Aziz Hospital Jatoi - OPD System</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #27ae60;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+        }
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Login Screen */
+        #login-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center; z-index: 9999; 
+        }
+        .login-box { 
+            background: white; padding: 40px; border-radius: 20px; 
+            text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.5); width: 350px; 
+        }
+        .login-box h2 { margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        .login-box input { 
+            display: block; width: 100%; margin-bottom: 15px; padding: 12px; 
+            border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px;
+        }
+        .login-box button { 
+            width: 100%; background: var(--accent); color: white; padding: 12px; 
+            border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; transition: 0.3s;
+        }
+        .login-box button:hover { background: #219150; transform: translateY(-2px); }
+
+        /* Main App Layout */
+        #main-app { display: none; width: 100%; height: 100vh; }
+        
+        .container { 
+            width: 60%; padding: 30px; background: rgba(255, 255, 255, 0.95); 
+            height: 100vh; overflow-y: auto; box-sizing: border-box;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.2);
+        }
+        
+        .right-panel { 
+            width: 40%; padding: 30px; background: rgba(236, 240, 241, 0.9); 
+            height: 100vh; overflow-y: auto; box-sizing: border-box;
+        }
+
+        h2 { color: var(--primary); margin-top: 0; display: flex; align-items: center; gap: 10px; }
+        h3 { color: var(--secondary); border-left: 5px solid var(--accent); padding-left: 10px; margin-top: 25px; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-weight: bold; font-size: 13px; color: var(--secondary); }
+        input, select { 
+            padding: 10px; border: 1px solid #ccc; border-radius: 6px; 
+            font-size: 14px; transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 5px rgba(39, 174, 96, 0.3); }
+
+        .mr-section { display: flex; gap: 5px; }
+        .mr-section input { flex: 1; font-weight: bold; color: #2c3e50; }
+
+        .buttons { display: flex; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; }
+        .btn { 
+            flex: 1; padding: 12px; border: none; border-radius: 8px; 
+            cursor: pointer; font-weight: bold; color: white; transition: 0.3s;
+            text-transform: uppercase; font-size: 12px; letter-spacing: 1px;
+        }
+        .btn-save { background: var(--accent); box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3); }
+        .btn-add { background: #3498db; }
+        .btn-search { background: var(--secondary); }
+        .btn-delete { background: var(--danger); }
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* Table Style */
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        th { background: var(--primary); color: white; padding: 12px; text-align: left; font-size: 14px; }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 13px; color: #333; }
+        tr:hover { background: #f9f9f9; }
+
+        .dev-tag { 
+            margin-top: 40px; padding: 15px; border-radius: 10px;
+            background: var(--primary); color: #fff; text-align: center;
+            font-size: 14px; letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Modern Login -->
+<div id="login-screen">
+    <div class="login-box">
+        <h2 style="margin-top:0">AHJ ACCESS</h2>
+        <p style="color:#666; font-size:12px; margin-bottom:20px;">Please enter credentials to unlock OPD System</p>
+        <input type="password" id="userInput" placeholder="Username (AHJ)">
+        <input type="password" id="passInput" placeholder="Password (Ayaz786)">
+        <button onclick="validateLogin()">SECURE LOGIN</button>
+        <p id="error-msg" style="color:var(--danger); display:none; margin-top:15px; font-weight:bold;">Access Denied!</p>
+    </div>
+</div>
+
+<!-- Main Application -->
+<div id="main-app">
+    <div class="container">
+        <h2>🏥 AZIZ HOSPITAL JATOI</h2>
+        
+        <div class="form-grid">
+            <div class="form-group"><label>Date</label><input type="date" id="entryDate" onchange="resetAppNo()"></div>
+            <div class="form-group"><label>Time</label><input type="time" id="entryTime"></div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label>MR Number (Editable)</label>
+                <div class="mr-section">
+                    <input type="number" id="mrNumber">
+                    <button class="btn btn-search" style="padding:0 15px" onclick="searchMR()">🔍</button>
+                </div>
+            </div>
+            <div class="form-group"><label>Token / App #</label><input type="text" id="appNo" readonly style="background:#f1f1f1;"></div>
+        </div>
+
+        <h3>👨‍⚕️ Doctor Selection</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Select Specialist</label>
+                <select id="drName" onchange="updateFee()">
+                    <option value="">-- Choose Doctor --</option>
+                    <option value="Dr. Abdul Aziz SB">Dr. Abdul Aziz SB</option>
+                    <option value="DR. Shahid Aziz SB">DR. Shahid Aziz SB</option>
+                    <option value="Dr. Ali Naqi SB">Dr. Ali Naqi SB</option>
+                    <option value="Dr. Sumaira Altaf">Dr. Sumaira Altaf</option>
+                    <option value="Dr. Jawad Qasim SB">Dr. Jawad Qasim SB</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Consultation Fee (Editable)</label><input type="number" id="fee"></div>
+        </div>
+
+        <h3>👤 Patient Information</h3>
+        <div class="form-grid">
+            <div class="form-group"><label>Full Name</label><input type="text" id="pName" placeholder="Enter Patient Name"></div>
+            <div class="form-group"><label>CNIC / ID</label><input type="text" id="cnic" placeholder="00000-0000000-0"></div>
+            <div class="form-group"><label>Age</label><input type="number" id="age"></div>
+            <div class="form-group"><label>Gender</label><select id="gender"><option>Male</option><option>Female</option></select></div>
+        </div>
+
+        <h3>🩺 Vitals & Examination</h3>
+        <div class="form-grid">
+            <div class="form-group"><label>BP (Systolic/Diastolic)</label><input type="text" id="bp" placeholder="120/80"></div>
+            <div class="form-group"><label>Temp (°F)</label><input type="text" id="temp" placeholder="98.6"></div>
+            <div class="form-group"><label>Pulse (BPM)</label><input type="text" id="pulse"></div>
+            <div class="form-group"><label>City / Address</label><input type="text" id="address"></div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-save" onclick="saveAndPrint()">💾 Save & Print Slip</button>
+            <button class="btn btn-add" onclick="addNew()">🆕 Add New Patient</button>
+            <button class="btn btn-delete" onclick="deleteRecord()">🗑️ Delete Record</button>
+        </div>
+
+        <div class="dev-tag">Developed with Care by: **Ayaz Majeed** | 📞 0300-1199701</div>
+    </div>
+
+    <div class="right-panel">
+        <h3 style="margin-top:0">📋 Today's Queue</h3>
+        <table id="recordTable">
+            <thead><tr><th>App#</th><th>MR#</th><th>Patient Name</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function validateLogin() {
+        if (document.getElementById('userInput').value === "AHJ" && document.getElementById('passInput').value === "Ayaz786") {
+            document.getElementById('login-screen').style.transition = '0.5s';
+            document.getElementById('login-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'flex';
+            }, 500);
+        } else { 
+            document.getElementById('error-msg').style.display = 'block'; 
+            document.getElementById('passInput').value = '';
+        }
+    }
+
+    function updateFee() {
+        const dr = document.getElementById('drName').value;
+        document.getElementById('fee').value = (dr !== "") ? 500 : "";
+    }
+
+    let patients = JSON.parse(localStorage.getItem('patients')) || [];
+    let mrCounter = parseInt(localStorage.getItem('mrCounter')) || 1;
+
+    window.onload = function() {
+        updateDateTime();
+        addNew();
+        loadTable();
+    };
+
+    function updateDateTime() {
+        let now = new Date();
+        document.getElementById('entryDate').valueAsDate = now;
+        document.getElementById('entryTime').value = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+    }
+
+    function addNew() {
+        ['pName', 'cnic', 'age', 'address', 'bp', 'temp', 'pulse', 'fee'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('drName').selectedIndex = 0;
+        document.getElementById('mrNumber').value = mrCounter;
+        updateDateTime();
+        resetAppNo();
+    }
+
+    function resetAppNo() {
+        let date = document.getElementById('entryDate').value;
+        let todaysCount = patients.filter(p => p.date === date).length;
+        document.getElementById('appNo').value = todaysCount + 1;
+    }
+
+    function saveAndPrint() {
+        let name = document.getElementById('pName').value;
+        let currentMR = parseInt(document.getElementById('mrNumber').value);
+        if(!name) { alert("Patient Name is required!"); return; }
+
+        let patient = {
+            date: document.getElementById('entryDate').value,
+            time: document.getElementById('entryTime').value,
+            mr: currentMR,
+            appNo: document.getElementById('appNo').value,
+            name: name,
+            dr: document.getElementById('drName').value,
+            fee: document.getElementById('fee').value,
+            bp: document.getElementById('bp').value,
+            temp: document.getElementById('temp').value,
+            age: document.getElementById('age').value,
+            gender: document.getElementById('gender').value
+        };
+
+        patients.push(patient);
+        mrCounter = currentMR + 1;
+        localStorage.setItem('patients', JSON.stringify(patients));
+        localStorage.setItem('mrCounter', mrCounter);
+        loadTable();
+        printSlip(patient);
+        addNew();
+    }
+
+    function printSlip(p) {
+        let win = window.open('', '', 'width=450,height=650');
+        win.document.write(`
+            <html>
+            <body style="font-family:'Courier New', monospace; padding:30px; border:2px solid #000; line-height:1.6;">
+                <center>
+                    <h1 style="margin:0; font-size:22px;">AZIZ HOSPITAL JATOI</h1>
+                    <p style="margin:5px 0;">OPD REGISTRATION SLIP</p>
+                    <div style="border-bottom:2px double #000; margin:10px 0;"></div>
+                </center>
+                <table style="width:100%; border:none;">
+                    <tr><td><b>MR#:</b> ${p.mr}</td><td align="right"><b>Token:</b> ${p.appNo}</td></tr>
+                    <tr><td><b>Date:</b> ${p.date}</td><td align="right"><b>Time:</b> ${p.time}</td></tr>
+                </table>
+                <div style="border-bottom:1px solid #000; margin:10px 0;"></div>
+                <p><b>PATIENT:</b> ${p.name.toUpperCase()} (${p.gender}/${p.age})</p>
+                <p><b>CONSULTANT:</b> ${p.dr}</p>
+                <p><b>VITALS:</b> BP: ${p.bp} | TEMP: ${p.temp}</p>
+                <div style="border-bottom:1px solid #000; margin:10px 0;"></div>
+                <h3 style="text-align:right; margin:0;">TOTAL FEE: ${p.fee} PKR</h3>
+                <br><br>
+                <center>
+                    <p style="font-size:12px;">*** Get Well Soon ***</p>
+                    <small>Electronically Generated Slip</small>
+                </center>
+            </body>
+            </html>
+        `);
+        win.document.close();
+        setTimeout(() => { win.print(); win.close(); }, 500);
+    }
+
+    function searchMR() {
+        let id = document.getElementById('mrNumber').value;
+        let f = patients.find(p => p.mr == id);
+        if(f) { 
+            document.getElementById('pName').value = f.name; 
+            document.getElementById('age').value = f.age || '';
+            document.getElementById('gender').value = f.gender || 'Male';
+            alert("Record retrieved successfully!"); 
+        } else { alert("MR# not found!"); }
+    }
+
+    function loadTable() {
+        let tbody = document.querySelector('#recordTable tbody');
+        tbody.innerHTML = '';
+        let date = document.getElementById('entryDate').value;
+        let todayData = patients.filter(p => p.date === date);
+        todayData.slice().reverse().forEach(p => {
+            tbody.innerHTML += `<tr><td>${p.appNo}</td><td>${p.mr}</td><td>${p.name}</td></tr>`;
+        });
+    }
+
+    function deleteRecord() {
+        let id = prompt("Enter MR# to Delete:");
+        if(id && confirm("Confirm delete record?")) {
+            patients = patients.filter(p => p.mr != id);
+            localStorage.setItem('patients', JSON.stringify(patients));
+            loadTable();
+        }
+    }
+</script>
+</body>
+</html>
