@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AHJ - Ultra 3D Medical System</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        :root {
+            --neon-blue: #00f2ff;
+            --neon-green: #00ff88;
+            --deep-bg: #050a10;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0; padding: 0;
+            font-family: 'Rajdhani', sans-serif;
+            background: radial-gradient(circle at center, #102a43 0%, #050a10 100%);
+            color: #e0e6ed; height: 100vh; display: flex; overflow: hidden;
+        }
+
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); backdrop-filter: blur(25px);
+            display: flex; justify-content: center; align-items: center; z-index: 10000;
+        }
+        .login-card {
+            background: var(--glass); padding: 50px; border-radius: 30px;
+            border: 1px solid var(--border); text-align: center;
+            box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); width: 400px;
+        }
+        .login-card input {
+            width: 100%; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border); border-radius: 10px; color: white; text-align: center; box-sizing: border-box;
+        }
+        .login-card button {
+            width: 100%; padding: 15px; border: none; border-radius: 10px;
+            background: linear-gradient(90deg, var(--neon-blue), #0072ff);
+            color: white; font-weight: bold; font-family: 'Orbitron'; cursor: pointer;
+        }
+
+        #main-app { display: none; width: 100%; height: 100vh; }
+        .side-bar { width: 60%; padding: 30px; overflow-y: auto; border-right: 1px solid var(--border); }
+        .data-panel { width: 40%; padding: 30px; overflow-y: auto; }
+
+        .glass-box {
+            background: var(--glass); border: 1px solid var(--border);
+            border-radius: 20px; padding: 25px; margin-bottom: 25px;
+        }
+
+        h2, h3 { font-family: 'Orbitron'; color: var(--neon-blue); text-transform: uppercase; margin-top: 0; }
+        label { display: block; font-size: 12px; color: #8899a6; font-weight: 700; margin-bottom: 8px; }
+
+        .input-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        input, select {
+            width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+            border-radius: 8px; color: #fff; box-sizing: border-box;
+        }
+
+        .btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .action-btn {
+            padding: 15px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;
+            text-transform: uppercase; font-family: 'Orbitron'; font-size: 10px;
+        }
+        .btn-save { background: #34495e; color: white; }
+        .btn-print { background: var(--neon-blue); color: #000; }
+        .btn-add { background: var(--neon-green); color: #000; }
+        .btn-del { background: #ff4b2b; color: white; }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        th { text-align: left; padding: 10px; color: var(--neon-blue); font-size: 12px; }
+        td { background: rgba(255,255,255,0.03); padding: 10px; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-card">
+        <h1>AHJ SYSTEM</h1>
+        <input type="text" id="userInput" placeholder="USER ID (admin)">
+        <input type="password" id="passInput" placeholder="PASSWORD (123)">
+        <button onclick="login()">AUTHORIZE SYSTEM</button>
+    </div>
+</div>
+
+<div id="main-app">
+    <div class="side-bar">
+        <h2>🏥 AZIZ HOSPITAL JATOI</h2>
+        <div class="glass-box">
+            <div class="input-grid">
+                <div><label>REGISTRATION DATE</label><input type="date" id="entryDate"></div>
+                <div><label>ENTRY TIME</label><input type="time" id="entryTime"></div>
+                <div><label>MR NUMBER</label><input type="text" id="mrNumber" readonly></div>
+                <div><label>APP# (TOKEN)</label><input type="text" id="appNo" readonly style="color:var(--neon-green)"></div>
+            </div>
+        </div>
+        <div class="glass-box">
+            <h3>PATIENT INFORMATION</h3>
+            <div class="input-grid">
+                <div style="grid-column: span 2;"><label>NAME</label><input type="text" id="pName"></div>
+                <div><label>AGE</label><input type="number" id="age"></div>
+                <div><label>GENDER</label><select id="gender"><option>Male</option><option>Female</option></select></div>
+            </div>
+        </div>
+        <div class="glass-box">
+            <h3>CLINICAL DETAILS</h3>
+            <div class="input-grid">
+                <div><label>DOCTOR</label>
+                    <select id="drName" onchange="updateFee()">
+                        <option value="">-- Choose --</option>
+                        <option value="Dr. Abdul Aziz SB">Dr. Abdul Aziz SB</option>
+                        <option value="DR. Shahid Aziz SB">DR. Shahid Aziz SB</option>
+                    </select>
+                </div>
+                <div><label>FEE</label><input type="number" id="fee"></div>
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="action-btn btn-save" onclick="saveData()">SAVE</button>
+            <button class="action-btn btn-print" onclick="window.print()">PRINT</button>
+            <button class="action-btn btn-add" onclick="resetForm()">NEW</button>
+            <button class="action-btn btn-del" onclick="clearData()">CLEAR</button>
+        </div>
+    </div>
+    <div class="data-panel">
+        <h3>RECORDS HISTORY</h3>
+        <table id="recordTable">
+            <thead><tr><th>MR#</th><th>Name</th><th>Dr.</th><th>Fee</th></tr></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let patients = JSON.parse(localStorage.getItem('hospitalData')) || [];
+
+    function login() {
+        if(document.getElementById('userInput').value === "admin" && document.getElementById('passInput').value === "123") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            resetForm();
+            loadTable();
+        } else { alert("Wrong Login!"); }
+    }
+
+    function resetForm() {
+        const now = new Date();
+        document.getElementById('entryDate').valueAsDate = now;
+        document.getElementById('entryTime').value = now.getHours() + ":" + (now.getMinutes()<10?'0':'') + now.getMinutes();
+        document.getElementById('mrNumber').value = "MR-" + Math.floor(10000 + Math.random() * 90000);
+        document.getElementById('appNo').value = "APP-" + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('pName').value = "";
+    }
+
+    function updateFee() {
+        const dr = document.getElementById('drName').value;
+        document.getElementById('fee').value = (dr === "Dr. Abdul Aziz SB") ? 1500 : 1200;
+    }
+
+    function saveData() {
+        const data = { mr: document.getElementById('mrNumber').value, name: document.getElementById('pName').value, dr: document.getElementById('drName').value, fee: document.getElementById('fee').value };
+        patients.push(data);
+        localStorage.setItem('hospitalData', JSON.stringify(patients));
+        loadTable();
+        alert("Saved!");
+    }
+
+    function loadTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = patients.slice().reverse().map(p => `<tr><td>${p.mr}</td><td>${p.name}</td><td>${p.dr}</td><td>${p.fee}</td></tr>`).join('');
+    }
+
+    function clearData() { localStorage.clear(); patients = []; loadTable(); }
+</script>
+</body>
+</html>
