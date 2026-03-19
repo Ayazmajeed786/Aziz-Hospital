@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AHJ - Ultra 3D Cloud System</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    
+    <!-- Firebase Libraries -->
+    <script src="https://www.gstatic.com"></script>
+    <script src="https://www.gstatic.com"></script>
+
+    <style>
+        :root { --neon-blue: #00f2ff; --neon-green: #00ff88; --deep-bg: #050a10; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
+        body { margin: 0; padding: 0; font-family: 'Rajdhani', sans-serif; background: radial-gradient(circle at center, #102a43 0%, #050a10 100%); color: #e0e6ed; height: 100vh; display: flex; overflow: hidden; }
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); backdrop-filter: blur(25px); display: flex; justify-content: center; align-items: center; z-index: 10000; }
+        .login-card { background: var(--glass); padding: 50px; border-radius: 30px; border: 1px solid var(--border); text-align: center; box-shadow: 0 0 50px rgba(0, 242, 255, 0.2); width: 400px; transform-style: preserve-3d; transform: perspective(1000px) rotateX(10deg); }
+        .login-card h1 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); letter-spacing: 3px; }
+        .login-card input { width: 100%; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 10px; color: white; text-align: center; font-size: 18px; }
+        .login-card button { width: 100%; padding: 15px; border: none; border-radius: 10px; background: linear-gradient(90deg, var(--neon-blue), #0072ff); color: white; font-weight: bold; font-family: 'Orbitron'; cursor: pointer; transition: 0.3s; }
+        #main-app { display: none; width: 100%; height: 100vh; }
+        .side-bar { width: 60%; padding: 30px; overflow-y: auto; box-sizing: border-box; border-right: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+        .data-panel { width: 40%; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
+        .glass-box { background: var(--glass); border: 1px solid var(--border); border-radius: 20px; padding: 25px; margin-bottom: 25px; box-shadow: 10px 10px 30px rgba(0,0,0,0.5); position: relative; }
+        h2, h3 { font-family: 'Orbitron', sans-serif; color: var(--neon-blue); text-transform: uppercase; margin-top: 0; }
+        label { display: block; font-size: 12px; color: #8899a6; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
+        .input-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        input, select { width: 100%; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 8px; color: #fff; font-size: 15px; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(0, 242, 255, 0.3); outline: none; }
+        .btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-top: 20px; }
+        .action-btn { padding: 15px; border: none; border-radius: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; font-family: 'Orbitron'; font-size: 10px; transition: 0.3s; box-shadow: 0 4px 0 rgba(0,0,0,0.5); }
+        .btn-save { background: #34495e; color: white; }
+        .btn-print { background: var(--neon-blue); color: #000; }
+        .btn-add { background: var(--neon-green); color: #000; }
+        .btn-del { background: #ff4b2b; color: white; }
+        .action-btn:active { transform: translateY(4px); box-shadow: none; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+        th { text-align: left; padding: 10px; color: var(--neon-blue); font-size: 12px; border-bottom: 1px solid var(--border); }
+        td { background: rgba(255,255,255,0.03); padding: 10px; font-size: 13px; }
+        tr:hover td { background: rgba(0, 242, 255, 0.05); }
+        .developer-footer { margin-top: auto; padding: 20px; text-align: center; border-radius: 15px; background: rgba(0, 242, 255, 0.05); border: 1px solid var(--border); }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-card">
+        <h1>AHJ SYSTEM</h1>
+        <p style="color: #666; margin-bottom: 30px;">ULTRA 3D CLOUD ACCESS</p>
+        <input type="password" id="userInput" placeholder="USER ID">
+        <input type="password" id="passInput" placeholder="PASSWORD">
+        <button onclick="login()">AUTHORIZE SYSTEM</button>
+    </div>
+</div>
+
+<div id="main-app">
+    <div class="side-bar">
+        <h2>🏥 AZIZ HOSPITAL JATOI</h2>
+        <div class="glass-box">
+            <div class="input-grid">
+                <div class="form-group"><label>REGISTRATION DATE</label><input type="date" id="entryDate" onchange="resetAppNo()"></div>
+                <div class="form-group"><label>ENTRY TIME</label><input type="time" id="entryTime"></div>
+                <div class="form-group">
+                    <label>MR NUMBER (SEARCHABLE)</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" id="mrNumber" style="flex:1">
+                        <button onclick="searchMR()" style="background:var(--neon-blue); border:none; width:45px; border-radius:8px; cursor:pointer">🔍</button>
+                    </div>
+                </div>
+                <div class="form-group"><label>TOKEN / APP NO</label><input type="text" id="appNo" readonly style="color:var(--neon-green); font-weight:bold;"></div>
+            </div>
+        </div>
+        <div class="glass-box">
+            <h3>PATIENT INFORMATION</h3>
+            <div class="input-grid">
+                <div class="form-group" style="grid-column: span 2;"><label>PATIENT FULL NAME</label><input type="text" id="pName"></div>
+                <div class="form-group"><label>CONTACT NUMBER</label><input type="text" id="contact"></div>
+                <div class="form-group"><label>CNIC NUMBER</label><input type="text" id="cnic"></div>
+                <div class="form-group"><label>AGE (YEARS)</label><input type="number" id="age"></div>
+                <div class="form-group"><label>GENDER</label><select id="gender"><option>Male</option><option>Female</option></select></div>
+            </div>
+            <div style="margin-top:15px;"><label>RESIDENTIAL ADDRESS</label><input type="text" id="address"></div>
+        </div>
+        <div class="glass-box">
+            <h3>CLINICAL DETAILS</h3>
+            <div class="input-grid" style="margin-bottom:20px">
+                <div class="form-group"><label>CONSULTANT DOCTOR</label>
+                    <select id="drName" onchange="updateFee()">
+                        <option value="">-- Choose Doctor --</option>
+                        <option value="Dr. Abdul Aziz SB">Dr. Abdul Aziz SB</option>
+                        <option value="DR. Shahid Aziz SB">DR. Shahid Aziz SB</option>
+                        <option value="Dr. Ali Naqi SB">Dr. Ali Naqi SB</option>
+                        <option value="Dr. Sumaira Altaf">Dr. Sumaira Altaf</option>
+                        <option value="Dr. Jawad Qasim SB">Dr. Jawad Qasim SB</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>CONSULTATION FEE (PKR)</label><input type="number" id="fee"></div>
+            </div>
+            <label>VITALS MONITORING</label>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                <input type="text" id="bp" placeholder="BP"><input type="text" id="temp" placeholder="Temp"><input type="text" id="pulse" placeholder="Pulse"><input type="text" id="spo2" placeholder="SPO2 %">
+            </div>
+        </div>
+        <div class="btn-group">
+            <button class="action-btn btn-save" onclick="saveData(false)">Save Data</button>
+            <button class="action-btn btn-print" onclick="saveData(true)">Save & Print</button>
+            <button class="action-btn btn-add" onclick="addNew()">Add New</button>
+            <button class="action-btn btn-del" onclick="deleteRecord()">Delete</button>
+        </div>
+    </div>
+    <div class="data-panel">
+        <h3>ARCHIVE FILTER</h3>
+        <div class="glass-box">
+            <div class="input-grid"><div><label>FROM</label><input type="date" id="filterFrom"></div><div><label>TO</label><input type="date" id="filterTo"></div></div>
+            <button class="action-btn btn-print" style="width:100%; margin-top:15px" onclick="loadTable()">QUERY RECORDS</button>
+        </div>
+        <div style="flex:1; overflow-y:auto">
+            <table id="recordTable"><thead><tr><th>Token</th><th>MR#</th><th>Name</th><th>Date</th><th>Time</th></tr></thead><tbody id="tableBody"></tbody></table>
+        </div>
+        <div class="developer-footer"><span style="color:var(--neon-blue); font-family:Orbitron; font-size:14px;">AYAZ MAJEED</span><br><small style="color:#555">CHIEF ARCHITECT | 0300-1199701</small></div>
+    </div>
+</div>
+
+<script>
+    // --- FIREBASE CONFIG (AZIZ HOSPITAL CLOUD) ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyAzC7nUpW-pCia7L7pB0f2f0f-vIuS9pY",
+        authDomain: "aziz-hospital-jatoi.firebaseapp.com",
+        databaseURL: "https://aziz-hospital-jatoi-default-rtdb.firebaseio.com",
+        projectId: "aziz-hospital-jatoi",
+        storageBucket: "aziz-hospital-jatoi.appspot.com",
+        messagingSenderId: "148522325853",
+        appId: "1:148522325853:web:96e172a3928a39d892839d"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let patients = [];
+    let mrCounter = 1;
+
+    function login() {
+        if (document.getElementById('userInput').value === "AHJ" && document.getElementById('passInput').value === "Ayaz786") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            loadDataFromCloud();
+        } else { alert("ACCESS DENIED!"); }
+    }
+
+    function loadDataFromCloud() {
+        db.ref('patients').on('value', (snapshot) => {
+            patients = [];
+            snapshot.forEach((child) => { patients.push(child.val()); });
+            if (patients.length > 0) mrCounter = Math.max(...patients.map(p => parseInt(p.mr) || 0)) + 1;
+            document.getElementById('mrNumber').value = mrCounter;
+            resetAppNo();
+        });
+    }
+
+    function updateFee() { document.getElementById('fee').value = (document.getElementById('drName').value !== "") ? 500 : ""; }
+
+    window.onload = function() {
+        let now = new Date();
+        document.getElementById('entryDate').valueAsDate = now;
+        document.getElementById('entryTime').value = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+    };
+
+    function addNew() {
+        ['pName', 'cnic', 'contact', 'age', 'address', 'bp', 'temp', 'pulse', 'spo2', 'fee'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('drName').selectedIndex = 0;
+        document.getElementById('mrNumber').value = mrCounter;
+        resetAppNo();
+    }
+
+    function resetAppNo() {
+        let date = document.getElementById('entryDate').value;
+        document.getElementById('appNo').value = patients.filter(p => p.date === date).length + 1;
+    }
+
+    function saveData(doPrint) {
+        let name = document.getElementById('pName').value;
+        let mr = parseInt(document.getElementById('mrNumber').value);
+        if(!name) return alert("Patient Name Required!");
+
+        let p = {
+            date: document.getElementById('entryDate').value,
+            time: document.getElementById('entryTime').value,
+            mr: mr, appNo: document.getElementById('appNo').value,
+            name: name, contact: document.getElementById('contact').value,
+            cnic: document.getElementById('cnic').value, age: document.getElementById('age').value,
+            gender: document.getElementById('gender').value, address: document.getElementById('address').value,
+            dr: document.getElementById('drName').value, fee: document.getElementById('fee').value,
+            bp: document.getElementById('bp').value, temp: document.getElementById('temp').value,
+            pulse: document.getElementById('pulse').value, spo2: document.getElementById('spo2').value
+        };
+
+        db.ref('patients/' + mr + '_' + Date.now()).set(p).then(() => {
+            if(doPrint) printSlip(p, confirm("OK for Thermal | Cancel for Normal") ? 'thermal' : 'normal');
+            else alert("Saved to Cloud!");
+            addNew();
+        });
+    }
+
+    function printSlip(p, mode) {
+        let win = window.open('', '', `width=${mode==='thermal'?300:700},height=700`);
+        win.document.write(`<html><body style="font-family:monospace;padding:10px;line-height:1.4;width:${mode==='thermal'?'250px':'90%'}">
+            <center><h2>AZIZ HOSPITAL JATOI</h2><p>OPD RECEIPT</p><hr></center>
+            <p>MR: ${p.mr} | Token: ${p.appNo} | Date: ${p.date}</p>
+            <p>Name: ${p.name.toUpperCase()} (${p.gender}/${p.age})</p>
+            <p>Doctor: ${p.dr}</p>
+            <p>Vitals: BP:${p.bp}|T:${p.temp}|P:${p.pulse}|O2:${p.spo2}</p><hr>
+            <h3 style="text-align:right">Fee: ${p.fee} PKR</h3><center><small>Ayaz Majeed 0300-1199701</small></center>
+        </body></html>`);
+        win.document.close(); setTimeout(() => { win.print(); win.close(); }, 500);
+    }
+
+    function searchMR() {
+        let id = document.getElementById('mrNumber').value;
+        let f = patients.slice().reverse().find(p => p.mr == id);
+        if(f) {
+            document.getElementById('pName').value = f.name;
+            document.getElementById('contact').value = f.contact || '';
+            document.getElementById('cnic').value = f.cnic || '';
+            document.getElementById('age').value = f.age || '';
+            document.getElementById('gender').value = f.gender || 'Male';
+            document.getElementById('address').value = f.address || '';
+            alert("Record Loaded!");
+        } else alert("Not Found!");
+    }
+
+    function loadTable() {
+        let tbody = document.getElementById('tableBody');
+        let from = document.getElementById('filterFrom').value, to = document.getElementById('filterTo').value;
+        if(!from || !to) return alert("Select Range!");
+        tbody.innerHTML = '';
+        patients.filter(p => p.date >= from && p.date <= to).reverse().forEach(p => {
+            tbody.innerHTML += `<tr><td>${p.appNo}</td><td>${p.mr}</td><td>${p.name}</td><td>${p.date}</td><td>${p.time}</td></tr>`;
+        });
+    }
+
+    function deleteRecord() {
+        let id = prompt("Enter MR# to Delete:");
+        if(id) {
+            db.ref('patients').orderByChild('mr').equalTo(parseInt(id)).once('value', s => {
+                s.forEach(c => c.ref.remove());
+                alert("Deleted");
+            });
+        }
+    }
+</script>
+</body>
+</html>
