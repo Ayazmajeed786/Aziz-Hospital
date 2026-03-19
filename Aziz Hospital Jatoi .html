@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AHJ - 3D Professional OPD System</title>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: rgba(30, 41, 59, 0.7);
+            --primary: #38bdf8;
+            --accent: #22c55e;
+            --danger: #ef4444;
+            --text: #f8fafc;
+        }
+
+        body { 
+            margin: 0; padding: 0; font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            height: 100vh; display: flex; color: var(--text); overflow: hidden;
+        }
+
+        /* 3D Login Screen */
+        #login-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px);
+            display: flex; justify-content: center; align-items: center; z-index: 9999; 
+        }
+        .login-box { 
+            background: var(--card); padding: 50px; border-radius: 30px; 
+            border: 1px solid rgba(255,255,255,0.1); text-align: center; 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); width: 400px;
+            transform: perspective(1000px) rotateX(5deg);
+        }
+        .login-box h1 { font-size: 28px; margin-bottom: 30px; color: var(--primary); text-shadow: 0 0 15px var(--primary); }
+        .login-box input { 
+            width: 100%; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: white; font-size: 16px;
+            transition: 0.3s;
+        }
+        .login-box input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 10px var(--primary); }
+        .login-box button { 
+            width: 100%; background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            color: white; padding: 15px; border: none; border-radius: 12px; cursor: pointer;
+            font-size: 18px; font-weight: 700; transform: translateZ(20px); transition: 0.3s;
+        }
+
+        /* Main Dashboard Layout */
+        #main-app { display: none; width: 100%; height: 100vh; animation: fadeIn 0.8s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .container { 
+            width: 65%; padding: 30px; height: 100vh; overflow-y: auto; box-sizing: border-box;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .right-panel { 
+            width: 35%; padding: 30px; background: rgba(0,0,0,0.2); 
+            height: 100vh; overflow-y: auto; box-sizing: border-box;
+        }
+
+        .glass-card { 
+            background: var(--card); padding: 25px; border-radius: 20px;
+            box-shadow: 20px 20px 60px #080c16, -5px -5px 20px rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 25px;
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 5px; }
+        label { font-size: 11px; margin-bottom: 8px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        
+        input, select { 
+            padding: 14px; background: rgba(15, 23, 42, 0.5); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; color: white; font-size: 14px; transition: 0.4s;
+        }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(56, 189, 248, 0.2); outline: none; }
+
+        .btn-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 25px; }
+        .btn { 
+            padding: 16px; border: none; border-radius: 15px; 
+            cursor: pointer; font-weight: 700; color: white; transition: 0.3s;
+            text-transform: uppercase; font-size: 10px; letter-spacing: 1px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+        }
+        .btn-save { background: #475569; border-bottom: 4px solid #1e293b; }
+        .btn-print { background: var(--primary); color: #0f172a; border-bottom: 4px solid #0284c7; }
+        .btn-add { background: var(--accent); color: #0f172a; border-bottom: 4px solid #166534; }
+        .btn-delete { background: var(--danger); border-bottom: 4px solid #991b1b; }
+        .btn:active { transform: translateY(4px); border-bottom: none; }
+        .btn:hover { filter: brightness(1.2); }
+
+        table { width: 100%; border-collapse: separate; border-spacing: 0 10px; margin-top: 10px; }
+        th { padding: 15px; text-align: left; color: var(--primary); font-size: 12px; text-transform: uppercase; }
+        td { padding: 15px; background: rgba(255,255,255,0.03); font-size: 13px; border-radius: 0; }
+        td:first-child { border-radius: 12px 0 0 12px; }
+        td:last-child { border-radius: 0 12px 12px 0; }
+
+        .dev-badge { 
+            text-align: center; margin-top: 40px; padding: 20px; border-radius: 20px;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(0,0,0,0));
+            border: 1px solid rgba(56, 189, 248, 0.2); font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-box">
+        <h1>AZIZ HOSPITAL JATOI</h1>
+        <p style="color: #64748b; margin-bottom: 30px;">3D Secure OPD Management System</p>
+        <input type="password" id="userInput" placeholder="USER ID (AHJ)">
+        <input type="password" id="passInput" placeholder="PASSWORD (Ayaz786)">
+        <button onclick="validateLogin()">INITIALIZE SYSTEM</button>
+    </div>
+</div>
+
+<div id="main-app">
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <h2 style="margin:0; font-size:28px; font-weight:700; background: linear-gradient(to right, #fff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">OPD REGISTRATION</h2>
+            <div id="liveClock" style="font-weight:600; color:var(--primary)"></div>
+        </div>
+        
+        <div class="glass-card">
+            <div class="form-grid">
+                <div class="form-group"><label>Entry Date</label><input type="date" id="entryDate" onchange="resetAppNo()"></div>
+                <div class="form-group"><label>Entry Time</label><input type="time" id="entryTime"></div>
+                <div class="form-group">
+                    <label>MR Number (Search or New)</label>
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" id="mrNumber" style="flex:1" placeholder="Search MR#">
+                        <button onclick="searchMR()" style="background:var(--primary); border:none; border-radius:10px; width:45px; cursor:pointer">🔍</button>
+                    </div>
+                </div>
+                <div class="form-group"><label>App / Token #</label><input type="text" id="appNo" readonly style="color:var(--accent); font-weight:bold; background:rgba(0,0,0,0.2)"></div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Consultant Specialist</label>
+                    <select id="drName" onchange="updateFee()">
+                        <option value="">-- Select Doctor --</option>
+                        <option value="Dr. Abdul Aziz SB">Dr. Abdul Aziz SB</option>
+                        <option value="DR. Shahid Aziz SB">DR. Shahid Aziz SB</option>
+                        <option value="Dr. Ali Naqi SB">Dr. Ali Naqi SB</option>
+                        <option value="Dr. Sumaira Altaf">Dr. Sumaira Altaf</option>
+                        <option value="Dr. Jawad Qasim SB">Dr. Jawad Qasim SB</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Fee (PKR)</label><input type="number" id="fee"></div>
+                <div class="form-group" style="grid-column: span 2;"><label>Patient Full Name</label><input type="text" id="pName" placeholder="Enter Full Name"></div>
+                <div class="form-group"><label>Phone Number</label><input type="text" id="contact" placeholder="03xx-xxxxxxx"></div>
+                <div class="form-group"><label>CNIC Number</label><input type="text" id="cnic" placeholder="3230x-xxxxxxx-x"></div>
+                <div class="form-group"><label>Age</label><input type="number" id="age"></div>
+                <div class="form-group"><label>Gender</label><select id="gender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+                <div class="form-group" style="grid-column: span 2;"><label>Full Address / City</label><input type="text" id="address" placeholder="Address Details"></div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <label style="display:block; margin-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:10px;">Vitals Monitoring</label>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                <div class="form-group"><label>BP</label><input type="text" id="bp" placeholder="e.g. 120/80"></div>
+                <div class="form-group"><label>Temp</label><input type="text" id="temp" placeholder="e.g. 98.6 F"></div>
+                <div class="form-group"><label>Pulse Rate</label><input type="text" id="pulse" placeholder="BPM"></div>
+                <div class="form-group"><label>SPO2 %</label><input type="text" id="spo2" placeholder="Oxygen %"></div>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-save" onclick="saveData(false)">💾 Just Save</button>
+            <button class="btn btn-print" onclick="saveData(true)">🖨️ Save & Print</button>
+            <button class="btn btn-add" onclick="addNew()">🆕 New Patient</button>
+            <button class="btn btn-delete" onclick="deleteRecord()">🗑️ Delete</button>
+        </div>
+
+        <div class="dev-badge">
+            <span style="color:#64748b">SYSTEM ARCHITECT:</span> <span style="color:var(--primary)">AYAZ MAJEED</span> 
+            <br><small style="color:#475569">Contact: 0300-1199701</small>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <h3 style="color:var(--primary); font-size:18px; margin-top:0">📊 RECORD FILTER</h3>
+        <div class="glass-card" style="padding:15px">
+            <div class="form-group"><label>From</label><input type="date" id="filterFrom"></div>
+            <div class="form-group" style="margin-top:10px"><label>To</label><input type="date" id="filterTo"></div>
+            <button class="btn btn-print" style="width:100%; margin-top:15px; padding:10px" onclick="loadTable()">FILTER DATA</button>
+        </div>
+        
+        <table id="recordTable">
+            <thead><tr><th>Token</th><th>MR#</th><th>Patient Name</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <div id="noDataMsg" style="text-align:center; padding:20px; color:#475569;">Select date range to view records</div>
+    </div>
+</div>
+
+<script>
+    function validateLogin() {
+        if (document.getElementById('userInput').value === "AHJ" && document.getElementById('passInput').value === "Ayaz786") {
+            document.getElementById('login-screen').style.transition = '1s';
+            document.getElementById('login-screen').style.transform = 'translateY(-100%)';
+            setTimeout(() => {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('main-app').style.display = 'flex';
+            }, 800);
+        } else { alert("INVALID ACCESS CREDENTIALS!"); }
+    }
+
+    function updateFee() { document.getElementById('fee').value = (document.getElementById('drName').value !== "") ? 500 : ""; }
+
+    let patients = JSON.parse(localStorage.getItem('patients')) || [];
+    let mrCounter = parseInt(localStorage.getItem('mrCounter')) || 1;
+
+    window.onload = function() {
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        addNew();
+    };
+
+    function updateDateTime() {
+        let now = new Date();
+        document.getElementById('liveClock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        document.getElementById('entryDate').valueAsDate = now;
+        document.getElementById('entryTime').value = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+    }
+
+    function addNew() {
+        ['pName', 'cnic', 'contact', 'age', 'address', 'bp', 'temp', 'pulse', 'spo2', 'fee'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('drName').selectedIndex = 0;
+        document.getElementById('mrNumber').value = mrCounter;
+        resetAppNo();
+    }
+
+    function resetAppNo() {
+        let date = document.getElementById('entryDate').value;
+        document.getElementById('appNo').value = patients.filter(p => p.date === date).length + 1;
+    }
+
+    function saveData(doPrint) {
+        let name = document.getElementById('pName').value;
+        if(!name) return alert("Patient Name is Mandatory!");
+        
+        let p = {
+            date: document.getElementById('entryDate').value,
+            time: document.getElementById('entryTime').value,
+            mr: parseInt(document.getElementById('mrNumber').value),
+            appNo: document.getElementById('appNo').value,
+            name: name,
+            contact: document.getElementById('contact').value,
+            cnic: document.getElementById('cnic').value,
+            age: document.getElementById('age').value,
+            gender: document.getElementById('gender').value,
+            address: document.getElementById('address').value,
+            dr: document.getElementById('drName').value,
+            fee: document.getElementById('fee').value,
+            bp: document.getElementById('bp').value,
+            temp: document.getElementById('temp').value,
+            spo2: document.getElementById('spo2').value
+        };
+
+        patients.push(p);
+        mrCounter = Math.max(...patients.map(item => item.mr), 0) + 1;
+        localStorage.setItem('patients', JSON.stringify(patients));
+        localStorage.setItem('mrCounter', mrCounter);
+        
+        if(doPrint) {
+            let type = confirm("CHOOSE PRINTER:\n\nOK for THERMAL (Small Slip)\nCANCEL for NORMAL (A4/Large)");
+            printSlip(p, type ? 'thermal' : 'normal');
+        } else { alert("Patient Record Secured Successfully!"); }
+        
+        addNew();
+    }
+
+    function printSlip(p, mode) {
+        let width = (mode === 'thermal') ? '300' : '700';
+        let win = window.open('', '', `width=${width},height=700`);
+        let containerStyle = (mode === 'thermal') ? 'width: 250px; font-size: 11px;' : 'width: 90%; font-size: 16px; margin: auto;';
+        
+        win.document.write(`
+            <html><body style="font-family:'Courier New', monospace; padding:15px; ${containerStyle} border:1px solid #000; line-height:1.4;">
+                <center>
+                    <h2 style="margin:0;">AZIZ HOSPITAL JATOI</h2>
+                    <p style="margin:5px 0;">OPD REGISTRATION SLIP</p>
+                    <hr style="border:1px dashed #000">
+                </center>
+                <div style="display:flex; justify-content:space-between">
+                    <span><b>MR#:</b> ${p.mr}</span> <span><b>Token:</b> ${p.appNo}</span>
+                </div>
+                <p><b>Date:</b> ${p.date} | <b>Time:</b> ${p.time}</p>
+                <hr style="border:1px dashed #000">
+                <p><b>NAME:</b> ${p.name.toUpperCase()}</p>
+                <p><b>INFO:</b> ${p.gender} | ${p.age} Years</p>
+                <p><b>DOCTOR:</b> ${p.dr}</p>
+                <p><b>VITALS:</b> BP:${p.bp} | T:${p.temp} | Pulse:${p.pulse} | SPO2:${p.spo2}%</p>
+                <hr style="border:1px dashed #000">
+                <h3 style="text-align:right; margin:10px 0;">FEE: ${p.fee} PKR</h3>
+                <center style="margin-top:20px">
+                    <p style="font-size:9px">Powered by: Ayaz Majeed (0300-1199701)</p>
+                </center>
+            </body></html>
+        `);
+        win.document.close();
+        setTimeout(() => { win.print(); win.close(); }, 500);
+    }
+
+    function searchMR() {
+        let id = document.getElementById('mrNumber').value;
+        let f = [...patients].reverse().find(p => p.mr == id);
+        if(f) {
+            ['pName', 'contact', 'cnic', 'age', 'gender', 'address'].forEach(key => {
+                document.getElementById(key).value = f[key] || '';
+            });
+            alert("History Found! Patient Profile Loaded.");
+        } else { alert("No Previous History Found for this MR#."); }
+    }
+
+    function loadTable() {
+        let tbody = document.querySelector('#recordTable tbody');
+        let from = document.getElementById('filterFrom').value;
+        let to = document.getElementById('filterTo').value;
+        
+        if(!from || !to) return alert("Please define Date Range first!");
+        
+        tbody.innerHTML = '';
+        let filtered = patients.filter(p => p.date >= from && p.date <= to);
+        
+        if(filtered.length === 0) {
+            document.getElementById('noDataMsg').style.display = 'block';
+        } else {
+            document.getElementById('noDataMsg').style.display = 'none';
+            filtered.reverse().forEach(p => {
+                tbody.innerHTML += `<tr><td>${p.appNo}</td><td>${p.mr}</td><td>${p.name}</td></tr>`;
+            });
+        }
+    }
+
+    function deleteRecord() {
+        let id = prompt("CONFIRMATION: Enter MR# to Delete permanently:");
+        if(id) {
+            patients = patients.filter(p => p.mr != id);
+            localStorage.setItem('patients', JSON.stringify(patients));
+            loadTable();
+            alert("Record Deleted.");
+        }
+    }
+</script>
+</body>
+</html>
