@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AHJ - Professional OPD System</title>
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.15);
+            --primary: #00d2ff;
+            --secondary: #3a7bd5;
+            --accent: #00ff88;
+            --danger: #ff4b2b;
+        }
+
+        body { 
+            margin: 0; padding: 0; font-family: 'Poppins', sans-serif;
+            background: linear-gradient(45deg, #0f2027, #203a43, #2c5364);
+            height: 100vh; display: flex; color: white; overflow: hidden;
+        }
+
+        /* 3D Glassmorphism Login */
+        #login-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
+            display: flex; justify-content: center; align-items: center; z-index: 9999; 
+        }
+        .login-box { 
+            background: var(--glass); padding: 40px; border-radius: 25px; 
+            border: 1px solid rgba(255,255,255,0.2); text-align: center; 
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5); width: 380px; 
+        }
+        .login-box input { 
+            width: 100%; margin-bottom: 20px; padding: 15px; background: rgba(255,255,255,0.1);
+            border: 1px solid var(--primary); border-radius: 10px; color: white; font-size: 16px;
+        }
+        .login-box button { 
+            width: 100%; background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer;
+            font-size: 18px; font-weight: bold; box-shadow: 0 5px 15px rgba(0,210,255,0.4);
+        }
+
+        /* App Layout */
+        #main-app { display: none; width: 100%; height: 100vh; }
+        
+        .container { 
+            width: 65%; padding: 30px; background: rgba(255,255,255,0.05); 
+            height: 100vh; overflow-y: auto; box-sizing: border-box;
+            backdrop-filter: blur(5px); border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .right-panel { 
+            width: 35%; padding: 30px; background: rgba(0,0,0,0.2); 
+            height: 100vh; overflow-y: auto; box-sizing: border-box;
+        }
+
+        .card { 
+            background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 10px; }
+        label { font-size: 12px; margin-bottom: 5px; color: var(--primary); font-weight: bold; text-transform: uppercase; }
+        input, select { 
+            padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 8px; color: white; transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); outline: none; }
+
+        .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .btn { 
+            flex: 1; padding: 14px; border: none; border-radius: 10px; 
+            cursor: pointer; font-weight: bold; color: white; transition: 0.3s;
+            text-transform: uppercase; font-size: 11px;
+        }
+        .btn-save { background: var(--accent); color: #000; }
+        .btn-print { background: var(--primary); color: #000; }
+        .btn-add { background: #555; }
+        .btn-delete { background: var(--danger); }
+        .btn:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { background: rgba(255,255,255,0.1); padding: 12px; text-align: left; color: var(--primary); }
+        td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+
+        .dev-info { text-align: center; margin-top: 30px; font-size: 13px; color: #aaa; border-top: 1px solid #444; padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-box">
+        <h1 style="color:var(--primary); margin:0">AZIZ HOSPITAL</h1>
+        <p style="color:#888">Secure Access Portal</p>
+        <input type="password" id="userInput" placeholder="User ID">
+        <input type="password" id="passInput" placeholder="Password">
+        <button onclick="validateLogin()">UNLOCK SYSTEM</button>
+    </div>
+</div>
+
+<div id="main-app">
+    <div class="container">
+        <h2 style="color:var(--accent); text-shadow: 0 0 10px var(--accent);">AZIZ HOSPITAL JATOI - OPD</h2>
+        
+        <div class="card">
+            <div class="form-grid">
+                <div class="form-group"><label>Entry Date</label><input type="date" id="entryDate" onchange="resetAppNo()"></div>
+                <div class="form-group"><label>Entry Time</label><input type="time" id="entryTime"></div>
+                <div class="form-group">
+                    <label>MR Number</label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="number" id="mrNumber" style="flex:1">
+                        <button class="btn btn-print" style="width:50px" onclick="searchMR()">🔍</button>
+                    </div>
+                </div>
+                <div class="form-group"><label>App / Token #</label><input type="text" id="appNo" readonly></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Consultant Doctor</label>
+                    <select id="drName" onchange="updateFee()">
+                        <option value="">-- Select Doctor --</option>
+                        <option value="Dr. Abdul Aziz SB">Dr. Abdul Aziz SB</option>
+                        <option value="DR. Shahid Aziz SB">DR. Shahid Aziz SB</option>
+                        <option value="Dr. Ali Naqi SB">Dr. Ali Naqi SB</option>
+                        <option value="Dr. Sumaira Altaf">Dr. Sumaira Altaf</option>
+                        <option value="Dr. Jawad Qasim SB">Dr. Jawad Qasim SB</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Fee (Editable)</label><input type="number" id="fee"></div>
+                <div class="form-group"><label>Patient Name</label><input type="text" id="pName"></div>
+                <div class="form-group"><label>Phone Number</label><input type="text" id="contact"></div>
+                <div class="form-group"><label>CNIC</label><input type="text" id="cnic"></div>
+                <div class="form-group"><label>Age</label><input type="number" id="age"></div>
+                <div class="form-group"><label>Gender</label><select id="gender"><option>Male</option><option>Female</option></select></div>
+                <div class="form-group"><label>City / Address</label><input type="text" id="address"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <label>Vitals (Pre-Examination)</label>
+            <div class="form-grid" style="margin-top:10px">
+                <input type="text" id="bp" placeholder="BP (e.g. 120/80)">
+                <input type="text" id="temp" placeholder="Temp (e.g. 98.6)">
+                <input type="text" id="pulse" placeholder="Pulse Rate">
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-save" onclick="saveData(false)">💾 Just Save</button>
+            <button class="btn btn-print" onclick="saveData(true)">🖨️ Save & Print Slip</button>
+            <button class="btn btn-add" onclick="addNew()">🆕 Add New</button>
+            <button class="btn btn-delete" onclick="deleteRecord()">🗑️ Delete</button>
+        </div>
+
+        <div class="dev-info">Developed by: **Ayaz Majeed** | 📞 0300-1199701</div>
+    </div>
+
+    <div class="right-panel">
+        <h3 style="color:var(--primary)">📋 FILTER RECORDS</h3>
+        <div class="card">
+            <div class="form-group"><label>From Date</label><input type="date" id="filterFrom"></div>
+            <div class="form-group"><label>To Date</label><input type="date" id="filterTo"></div>
+            <button class="btn btn-print" style="width:100%" onclick="loadTable()">SHOW LIST</button>
+        </div>
+        <table id="recordTable">
+            <thead><tr><th>App#</th><th>MR#</th><th>Name</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function validateLogin() {
+        if (document.getElementById('userInput').value === "AHJ" && document.getElementById('passInput').value === "Ayaz786") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+        } else { alert("Access Denied!"); }
+    }
+
+    function updateFee() { document.getElementById('fee').value = (document.getElementById('drName').value !== "") ? 500 : ""; }
+
+    let patients = JSON.parse(localStorage.getItem('patients')) || [];
+    let mrCounter = parseInt(localStorage.getItem('mrCounter')) || 1;
+
+    window.onload = function() {
+        let now = new Date();
+        document.getElementById('entryDate').valueAsDate = now;
+        document.getElementById('entryTime').value = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+        addNew();
+    };
+
+    function addNew() {
+        ['pName', 'cnic', 'contact', 'age', 'address', 'bp', 'temp', 'pulse', 'fee'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('drName').selectedIndex = 0;
+        document.getElementById('mrNumber').value = mrCounter;
+        resetAppNo();
+    }
+
+    function resetAppNo() {
+        let date = document.getElementById('entryDate').value;
+        document.getElementById('appNo').value = patients.filter(p => p.date === date).length + 1;
+    }
+
+    function saveData(doPrint) {
+        let name = document.getElementById('pName').value;
+        if(!name) return alert("Enter Patient Name!");
+        
+        let p = {
+            date: document.getElementById('entryDate').value,
+            time: document.getElementById('entryTime').value,
+            mr: parseInt(document.getElementById('mrNumber').value),
+            appNo: document.getElementById('appNo').value,
+            name: name,
+            contact: document.getElementById('contact').value,
+            cnic: document.getElementById('cnic').value,
+            age: document.getElementById('age').value,
+            gender: document.getElementById('gender').value,
+            address: document.getElementById('address').value,
+            dr: document.getElementById('drName').value,
+            fee: document.getElementById('fee').value,
+            bp: document.getElementById('bp').value,
+            temp: document.getElementById('temp').value
+        };
+
+        patients.push(p);
+        mrCounter = p.mr + 1;
+        localStorage.setItem('patients', JSON.stringify(patients));
+        localStorage.setItem('mrCounter', mrCounter);
+        
+        if(doPrint) {
+            let type = confirm("Click OK for Thermal (Small) or Cancel for Normal (A4)");
+            printSlip(p, type ? 'thermal' : 'normal');
+        } else { alert("Record Saved Successfully!"); }
+        
+        addNew();
+    }
+
+    function printSlip(p, mode) {
+        let width = (mode === 'thermal') ? '300' : '600';
+        let win = window.open('', '', `width=${width},height=600`);
+        let style = (mode === 'thermal') ? 'font-size:12px; width:250px;' : 'font-size:16px; width:100%;';
+        
+        win.document.write(`<html><body style="font-family:monospace; padding:10px; ${style} border:1px solid #000;">
+            <center><h2>AZIZ HOSPITAL JATOI</h2><p>OPD RECEIPT</p></center><hr>
+            <p>MR#: ${p.mr} | App#: ${p.appNo}</p>
+            <p>Date: ${p.date} | Time: ${p.time}</p>
+            <p>Patient: ${p.name} (${p.age}/${p.gender})</p>
+            <p>Contact: ${p.contact}</p>
+            <p>Doctor: ${p.dr}</p>
+            <p>BP: ${p.bp} | Temp: ${p.temp}</p>
+            <hr><h3 style="text-align:right">Total: ${p.fee} PKR</h3>
+            <center><p>Get Well Soon</p></center>
+        </body></html>`);
+        win.document.close();
+        setTimeout(() => { win.print(); win.close(); }, 500);
+    }
+
+    function searchMR() {
+        let id = document.getElementById('mrNumber').value;
+        let f = patients.find(p => p.mr == id);
+        if(f) {
+            ['pName', 'contact', 'cnic', 'age', 'gender', 'address'].forEach(key => {
+                document.getElementById(key).value = f[key] || '';
+            });
+            alert("Patient Details Auto-Filled!");
+        } else alert("No Previous Record!");
+    }
+
+    function loadTable() {
+        let tbody = document.querySelector('#recordTable tbody');
+        tbody.innerHTML = '';
+        let from = document.getElementById('filterFrom').value;
+        let to = document.getElementById('filterTo').value;
+        if(!from || !to) return alert("Select Date Range!");
+        
+        patients.filter(p => p.date >= from && p.date <= to).reverse().forEach(p => {
+            tbody.innerHTML += `<tr><td>${p.appNo}</td><td>${p.mr}</td><td>${p.name}</td></tr>`;
+        });
+    }
+
+    function deleteRecord() {
+        let id = prompt("Enter MR# to Delete:");
+        patients = patients.filter(p => p.mr != id);
+        localStorage.setItem('patients', JSON.stringify(patients));
+        loadTable();
+    }
+</script>
+</body>
+</html>
