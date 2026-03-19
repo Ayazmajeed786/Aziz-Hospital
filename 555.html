@@ -1,0 +1,92 @@
+<script>
+    let patients = JSON.parse(localStorage.getItem('hospitalRecords')) || [];
+
+    // Login Function
+    function login() {
+        const u = document.getElementById('userInput').value;
+        const p = document.getElementById('passInput').value;
+        if(u === "admin" && p === "123") {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-app').style.display = 'flex';
+            resetForm(); // Form ko auto-fill karne ke liye
+            renderTable();
+        } else { alert("ACCESS DENIED!"); }
+    }
+
+    // Auto-Generate Everything (MR, APP#, Date, Time)
+    function resetForm() {
+        const now = new Date();
+        
+        // 1. Current Date
+        document.getElementById('entryDate').valueAsDate = now;
+        
+        // 2. Current Time
+        const hours = String(now.getHours()).padStart(2, '0');
+        const mins = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('entryTime').value = `${hours}:${mins}`;
+        
+        // 3. Auto MR Number (Random 5 digits)
+        document.getElementById('mrNumber').value = Math.floor(10000 + Math.random() * 90000);
+        
+        // 4. APP# (Wahi format jo image mein hai)
+        document.getElementById('appNo').value = "APP-" + Math.floor(1000 + Math.random() * 8999);
+
+        // Baqi fields khali karne ke liye
+        document.getElementById('pName').value = "";
+        document.getElementById('age').value = "";
+        document.getElementById('contact').value = "";
+        document.getElementById('cnic').value = "";
+        document.getElementById('address').value = "";
+        document.getElementById('fee').value = "";
+        document.getElementById('drName').selectedIndex = 0;
+    }
+
+    // Consultant Fee Logic
+    function updateFee() {
+        const fees = {
+            "Dr. Abdul Aziz SB": 1500, 
+            "DR. Shahid Aziz SB": 1200, 
+            "Dr. Ali Naqi SB": 1000, 
+            "Dr. Sumaira Altaf": 1200, 
+            "Dr. Jawad Qasim SB": 1500
+        };
+        document.getElementById('fee').value = fees[document.getElementById('drName').value] || 0;
+    }
+
+    // Save Record
+    function saveData() {
+        const name = document.getElementById('pName').value;
+        if(!name) return alert("Enter Patient Name!");
+
+        const record = {
+            mr: document.getElementById('mrNumber').value,
+            name: name,
+            dr: document.getElementById('drName').value,
+            fee: document.getElementById('fee').value
+        };
+
+        patients.push(record);
+        localStorage.setItem('hospitalRecords', JSON.stringify(patients));
+        renderTable();
+        alert("Record Saved Successfully!");
+    }
+
+    // Show in Table
+    function renderTable() {
+        const body = document.getElementById('recordTableBody');
+        body.innerHTML = patients.slice().reverse().map(p => `
+            <tr>
+                <td>${p.mr}</td>
+                <td>${p.name}</td>
+                <td>${p.dr}</td>
+                <td>${p.fee}</td>
+            </tr>
+        `).join('');
+    }
+
+    function printSlip() { window.print(); }
+    function clearAll() { if(confirm("Delete all history?")) { localStorage.clear(); patients = []; renderTable(); } }
+
+    // Initialize on load
+    window.onload = resetForm;
+</script>
